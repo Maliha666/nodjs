@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Example</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <!--jQuery needs to be loaded before boorstrap-->
+    <!--Bootstrap start-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!--Bootstrap End-->
+
+    <script>
+        
+        // const socket = io()
+        var socket =io.connect();
+        let isNickset = false
+        //chat event
+        socket.on('chat', function(data){
+            $('textarea').val($('textarea').val()+data+'\n')
+        });
+
+        //userlist event
+        socket.on('userlist', (data)=>{
+            console.log("client : userlist event : data =>", data)
+            $('#activeuser').empty();
+            data.map((item)=> {
+                $('#activeuser').append('nickname: <strong>${item}<strong><br/>')
+            })
+            let total = data.length;
+            document.getElementById('listu').innerHTML= total
+            $('b').val(total);
+        })
+
+        $(function(){
+            //set nickname
+            $('#nick').on('click', function(event){
+                event.preventDefault() // stop refresh
+                socket.emit('nick', $('#nickText').val());
+                $('#nick').hide()
+                isNickset = true
+            });
+
+            //send chat message
+            $('#chat').on('click', function(event){
+                event.preventDefault()
+                if(isNickset){
+                    socket.emit('chat',{
+                        message:$('#chatText').val()
+                    });
+                }
+                $('#chatText').val('')
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!--/col-6-->
+            <div class="col-md-6">
+                <div class="panel">
+                    <div class="panel-body">
+                        <center>
+                            <h5></h5>
+                            <h5>Simple Chat with Node</h5>
+                        </center>
+                        <div class="panel panel-info">
+                            <div class="panel-body">
+                                <form>
+                                    <div class="forme-group">
+                                        <p>
+                                            <input id="nickText" type="text" style="padding:5px; border:1px solid peru;"/>
+                                            <button id="nick" style="padding:5px; background-color: powderblue;">Set Nickname</button>
+                                        </p>
+                                        <textarea style="font-size:12px ;height: 300px;  width: 500px; border: 1px solid purple;"></textarea>
+                                        <p>
+                                            <input id="chatText" type="text" style="padding:5px ; width:100%; border:2px solid green ;" />
+                                            <button id="chat" style="padding: 5px; color: yellow; background-color: black;">Send Chat Message</button>
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+  
+</body>
+</html>
